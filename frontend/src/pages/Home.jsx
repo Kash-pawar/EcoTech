@@ -50,10 +50,8 @@ export default function HomePage() {
 
     try {
       const response = await API.post("/api/contact", contactForm);
-    
-      const data = await response.json();
 
-      if (response.ok && data.success) {
+      if (response.status === 200 || response.status === 201) {
         setContactStatus({ loading: false, success: true, error: null });
         setContactForm({ name: "", email: "", message: "" });
         // Clear success message after 5 seconds
@@ -61,18 +59,33 @@ export default function HomePage() {
           setContactStatus({ loading: false, success: false, error: null });
         }, 5000);
       } else {
+        const errorMsg = response.data?.message || "Error sending message. Please try again.";
         setContactStatus({
           loading: false,
           success: false,
-          error: data.message || "Error sending message. Please try again.",
+          error: errorMsg,
         });
       }
     } catch (error) {
       console.error("Contact form error:", error);
+      
+      // Extract error message from axios error
+      let errorMessage = "Error sending message. Please check your connection and try again.";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 400) {
+        errorMessage = "Please fill in all required fields correctly.";
+      } else if (error.response?.status === 500) {
+        errorMessage = "Server error. Please try again later.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setContactStatus({
         loading: false,
         success: false,
-        error: "Error sending message. Please check your connection and try again.",
+        error: errorMessage,
       });
     }
   };
