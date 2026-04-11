@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { Leaf, BarChart3, Users, Zap, ChevronDown } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Leaf, BarChart3, Users, Zap, ChevronDown, LogIn, Activity, TrendingUp, Sparkles } from "lucide-react";
 import Navbar from "../components/Navbar";
 
 export default function HomePage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactStatus, setContactStatus] = useState({ loading: false, success: false, error: null });
+  const [activeStep, setActiveStep] = useState(0);
+  const [carouselScroll, setCarouselScroll] = useState(0);
+  const [autoScroll, setAutoScroll] = useState(true);
+
+  // Check auth status
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, [location]);
 
   // Handle hash scrolling
   useEffect(() => {
@@ -19,6 +32,64 @@ export default function HomePage() {
       }
     }
   }, [location.hash]);
+
+  // Protected navigation handler
+  const handleProtectedNavigation = (path) => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    } else {
+      navigate(path);
+    }
+  };
+
+  // Handle contact form submission
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactStatus({ loading: true, success: false, error: null });
+
+    try {
+      const response = await fetch("http://localhost:5001/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contactForm),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setContactStatus({ loading: false, success: true, error: null });
+        setContactForm({ name: "", email: "", message: "" });
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setContactStatus({ loading: false, success: false, error: null });
+        }, 5000);
+      } else {
+        setContactStatus({
+          loading: false,
+          success: false,
+          error: data.message || "Error sending message. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Contact form error:", error);
+      setContactStatus({
+        loading: false,
+        success: false,
+        error: "Error sending message. Please check your connection and try again.",
+      });
+    }
+  };
+
+  // Auto-scroll carousel
+  useEffect(() => {
+    if (!autoScroll) return;
+    const interval = setInterval(() => {
+      setCarouselScroll((prev) => (prev + 1) % 3);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [autoScroll]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -41,14 +112,14 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={() => navigate("/daily")}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold transition text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
+                onClick={() => handleProtectedNavigation("/daily")}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 text-lg shadow-lg hover:shadow-xl hover:scale-105"
               >
                 Start Tracking
               </button>
               <button
-                onClick={() => navigate("/community")}
-                className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 rounded-xl font-semibold transition text-lg hover:shadow-lg hover:scale-105"
+                onClick={() => handleProtectedNavigation("/community")}
+                className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 rounded-xl font-semibold transition-all duration-300 text-lg hover:shadow-lg hover:scale-105"
               >
                 Join Community
               </button>
@@ -71,27 +142,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== ABOUT US SECTION ========== */}
-      <section id="about" className="py-16 px-6 bg-gradient-to-br from-green-50 via-white to-emerald-50">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12 group">
-            <div className="inline-block">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 group-hover:text-green-600 transition duration-300">About EcoTrack</h2>
-            </div>
-            <div className="w-16 h-1 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto mb-6 group-hover:w-24 transition-all duration-300"></div>
-            <p className="text-sm text-green-600 font-semibold tracking-wide">Our Story & Mission</p>
-          </div>
-          <div className="space-y-5 text-base md:text-lg text-gray-700 leading-relaxed">
-            <p className="hover:text-green-700 hover:translate-x-1 transition duration-300 bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-green-500">
-              <span className="font-semibold text-green-600">We started EcoTrack</span> because we believed that small actions, when multiplied by millions of people, create massive environmental change. Today, our community is tracking millions of eco-friendly actions and reducing carbon footprints across the globe.
-            </p>
-            <p className="hover:text-green-700 hover:translate-x-1 transition duration-300 bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-emerald-500">
-              <span className="font-semibold text-emerald-600">Our mission is simple:</span> empower every individual with data-driven insights to make sustainable choices. We're building a world where eco-consciousness is the norm, not the exception.
-            </p>
           </div>
         </div>
       </section>
@@ -140,77 +190,193 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========== HOW IT WORKS ========== */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+      {/* ========== HOW IT WORKS - TIMELINE ========== */}
+      <section className="py-24 px-6 bg-gradient-to-br from-white via-green-50 to-emerald-50 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-green-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-emerald-200 rounded-full blur-3xl opacity-15 animate-pulse" style={{ animationDelay: "1s" }}></div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">How It Works</h2>
+            <p className="text-gray-600 text-lg">Three simple steps to transform your eco-journey</p>
+          </div>
+
+          {/* Timeline Container */}
+          <div className="flex justify-center items-center gap-8 md:gap-16">
             {[
-              { step: 1, title: "Sign Up / Login", desc: "Create your account and get started" },
-              { step: 2, title: "Add Your Daily Data", desc: "Log your daily activities and habits" },
-              { step: 3, title: "Get Insights & Improve", desc: "View analytics and receive suggestions" },
-            ].map((item) => (
-              <div key={item.step} className="bg-white p-8 rounded-2xl shadow-lg text-center">
-                <div className="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                  {item.step}
+              { step: 1, icon: LogIn, title: "Sign Up / Login", desc: "Create your account and get started", color: "from-blue-500 to-blue-600" },
+              { step: 2, icon: Activity, title: "Add Your Daily Data", desc: "Log your daily activities and habits", color: "from-green-500 to-emerald-600" },
+              { step: 3, icon: TrendingUp, title: "Get Insights & Improve", desc: "View analytics and receive suggestions", color: "from-purple-500 to-pink-600" },
+            ].map((item, idx) => (
+              <div key={item.step} className="flex items-start gap-6 md:gap-8 flex-1 max-w-sm">
+                <div className="flex flex-col items-center w-full">
+                  <button
+                    onClick={() => setActiveStep(item.step - 1)}
+                    onMouseEnter={() => setActiveStep(item.step - 1)}
+                    className={`relative mb-6 transition-all duration-300 ${
+                      activeStep === item.step - 1 
+                        ? "scale-125 drop-shadow-2xl" 
+                        : "scale-100 hover:scale-110"
+                    }`}
+                  >
+                    {/* Glow effect */}
+                    {activeStep === item.step - 1 && (
+                      <div className={`absolute inset-0 w-20 h-20 bg-gradient-to-r ${item.color} rounded-full blur-xl opacity-60 animate-pulse`}></div>
+                    )}
+                    
+                    {/* Node */}
+                    <div className={`relative w-20 h-20 rounded-full flex items-center justify-center cursor-pointer border-4 ${
+                      activeStep === item.step - 1
+                        ? `bg-gradient-to-r ${item.color} border-white shadow-2xl`
+                        : "bg-white border-gray-300 hover:border-green-500 shadow-lg"
+                    } transition-all duration-300`}>
+                      <item.icon size={32} className={activeStep === item.step - 1 ? "text-white" : "text-gray-600"} />
+                    </div>
+                  </button>
+
+                  {/* Connecting line */}
+                  {idx < 2 && (
+                    <div className="hidden md:block absolute top-16 left-[60%] w-20 h-1 bg-gradient-to-r from-green-400 to-emerald-400 shadow-lg"></div>
+                  )}
+
+                  {/* Content */}
+                  <div className={`text-center transition-all duration-300 ${activeStep === item.step - 1 ? "opacity-100 scale-105" : "opacity-75"}`}>
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900 mt-4 mb-2">{item.title}</h3>
+                    <p className={`text-sm md:text-base ${activeStep === item.step - 1 ? "text-green-600 font-medium" : "text-gray-600"}`}>
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{item.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ========== COMMUNITY PREVIEW ========== */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
-            Join Our Community
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {[
-              {
-                author: "Aarav Sharma",
-                title: "Cut plastic usage by 50% this month!",
-                impact: "Saved 15 kg CO₂",
-              },
-              {
-                author: "Priya Verma",
-                title: "Switched to public transport - feeling great!",
-                impact: "Saved 32 kg CO₂",
-              },
-              {
-                author: "Rohan Gupta",
-                title: "Started composting kitchen waste",
-                impact: "Saved 8 kg CO₂",
-              },
-            ].map((post, idx) => (
-              <div
-                key={idx}
-                className="bg-gradient-to-br from-green-50 to-white p-6 rounded-2xl border border-green-100 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-green-600 rounded-full text-white flex items-center justify-center font-bold">
-                    {post.author.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{post.author}</p>
-                  </div>
-                </div>
-                <p className="text-gray-700 mb-4">{post.title}</p>
-                <div className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold inline-block">
-                  {post.impact}
-                </div>
-              </div>
-            ))}
+      {/* ========== COMMUNITY CAROUSEL - GLASSMORPHIC ========== */}
+      <section className="py-24 px-6 bg-gradient-to-br from-emerald-50 via-white to-green-50 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute top-20 right-20 w-80 h-80 bg-green-300 rounded-full blur-3xl opacity-10 animate-bounce"></div>
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-emerald-300 rounded-full blur-3xl opacity-10" style={{ animation: "bounce 4s infinite 1s" }}></div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">Join Our Community</h2>
+            <p className="text-gray-600 text-lg">See what our eco-warriors are achieving</p>
           </div>
-          <div className="text-center">
+
+          {/* Carousel Container */}
+          <div 
+            className="relative"
+            onMouseEnter={() => setAutoScroll(false)}
+            onMouseLeave={() => setAutoScroll(true)}
+          >
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+              {[
+                {
+                  author: "Aarav Sharma",
+                  initials: "AS",
+                  title: "Cut plastic usage by 50% this month!",
+                  impact: "Saved 15 kg CO₂",
+                  badges: ["🌱 Eco Hero", "♻️ Sustainable"],
+                  gradient: "from-blue-400 to-cyan-500",
+                },
+                {
+                  author: "Priya Verma",
+                  initials: "PV",
+                  title: "Switched to public transport - feeling great!",
+                  impact: "Saved 32 kg CO₂",
+                  badges: ["🚴 Active User", "🌍 Global"],
+                  gradient: "from-green-400 to-emerald-500",
+                },
+                {
+                  author: "Rohan Gupta",
+                  initials: "RG",
+                  title: "Started composting kitchen waste",
+                  impact: "Saved 8 kg CO₂",
+                  badges: ["🌱 Eco Hero", "♻️ Sustainable"],
+                  gradient: "from-purple-400 to-pink-500",
+                },
+              ].map((post, idx) => (
+                <div
+                  key={idx}
+                  className={`group relative transition-all duration-500 transform ${
+                    carouselScroll === idx ? "md:scale-105 md:z-20" : "md:scale-95 md:opacity-70"
+                  }`}
+                >
+                  {/* Glassmorphic card */}
+                  <div className="relative backdrop-blur-xl bg-white/30 border border-white/40 rounded-3xl p-8 hover:bg-white/50 hover:border-white/60 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-2 overflow-hidden">
+                    {/* Gradient background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${post.gradient} opacity-5 rounded-3xl`}></div>
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Profile initials */}
+                      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${post.gradient} text-white font-bold text-xl mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        {post.initials}
+                      </div>
+
+                      {/* Name */}
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">{post.author}</h3>
+
+                      {/* Activity */}
+                      <p className="text-gray-700 text-sm md:text-base mb-4 leading-relaxed">{post.title}</p>
+
+                      {/* Impact badge */}
+                      <div className="mb-4">
+                        <span className="inline-block bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                          {post.impact}
+                        </span>
+                      </div>
+
+                      {/* Floating badges */}
+                      <div className="flex flex-wrap gap-2">
+                        {post.badges.map((badge, bidx) => (
+                          <div
+                            key={bidx}
+                            className="relative inline-block text-xs text-gray-700 bg-white/60 px-3 py-1 rounded-full border border-white/40 backdrop-blur-sm group-hover:bg-white/80 transition-all duration-300 animate-pulse"
+                            style={{ animationDelay: `${bidx * 200}ms` }}
+                          >
+                            {badge}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Auto-scroll indicator */}
+            <div className="flex justify-center mt-8 gap-2">
+              {[0, 1, 2].map((dot) => (
+                <button
+                  key={dot}
+                  onClick={() => {
+                    setCarouselScroll(dot);
+                    setAutoScroll(false);
+                  }}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    carouselScroll === dot 
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 w-8" 
+                      : "bg-gray-300 hover:bg-gray-400"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Explore button */}
+          <div className="text-center mt-12">
             <button
-              onClick={() => navigate("/community")}
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-semibold transition text-lg hover:scale-105 shadow-lg hover:shadow-xl"
+              onClick={() => handleProtectedNavigation("/community")}
+              className="group relative inline-block px-10 py-4 font-semibold text-lg rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl"
             >
-              Explore Community
+              <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 group-hover:from-green-700 group-hover:to-emerald-700 transition-all duration-300"></div>
+              <span className="relative text-white flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                Explore Community <Sparkles size={20} className="animate-pulse" />
+              </span>
             </button>
           </div>
         </div>
@@ -271,38 +437,51 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">Get in Touch</h2>
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Thank you for reaching out! We'll get back to you soon.");
-              e.target.reset();
-            }}
+            onSubmit={handleContactSubmit}
             className="bg-gray-50 p-8 rounded-2xl shadow-lg border border-gray-200"
           >
+            {contactStatus.success && (
+              <div className="mb-6 p-4 bg-green-100 border border-green-500 text-green-700 rounded-lg">
+                ✓ Message sent successfully! We'll get back to you soon.
+              </div>
+            )}
+            {contactStatus.error && (
+              <div className="mb-6 p-4 bg-red-100 border border-red-500 text-red-700 rounded-lg">
+                ✗ {contactStatus.error}
+              </div>
+            )}
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <input
                 type="text"
                 placeholder="Your Name"
+                value={contactForm.name}
+                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
                 required
               />
               <input
                 type="email"
                 placeholder="Your Email"
+                value={contactForm.email}
+                onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
                 required
               />
             </div>
             <textarea
-              placeholder="Your Message"
+              placeholder="Your Message (10-1000 characters)"
               rows="5"
+              value={contactForm.message}
+              onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 mb-6"
               required
             ></textarea>
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-semibold transition text-lg"
+              disabled={contactStatus.loading}
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 text-lg hover:shadow-lg hover:scale-105 cursor-pointer"
             >
-              Send Message
+              {contactStatus.loading ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>
@@ -376,8 +555,7 @@ export default function HomePage() {
 
             <div>
               <h4 className="font-semibold mb-4 text-lg">Contact</h4>
-              <p className="text-gray-400 mb-2">Email: ecotrack@google.com</p>
-              <p className="text-gray-400">Phone: +1 (555) 123-4567</p>
+              <p className="text-gray-400">Email: ecotrack@google.com</p>
             </div>
           </div>
 

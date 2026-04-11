@@ -31,8 +31,8 @@ export default function Signup() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      alert("Signup successful! Redirecting to daily tracker...");
-      navigate("/daily");
+      alert("Signup successful! Redirecting to home...");
+      navigate("/");
     } catch (error) {
       console.error("Signup error:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Signup failed");

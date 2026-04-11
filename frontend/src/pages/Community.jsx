@@ -73,7 +73,7 @@ export default function Community() {
       <div className="flex pt-20">
         {/* LEFT SIDEBAR - TAGS SECTION */}
         <div className="w-64 bg-gray-50 border-r border-gray-200 p-6 min-h-[calc(100vh-80px)]">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">🏷️ Filter by Tag</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Filter by Tag</h3>
 
           <div className="space-y-2">
             {tags.map((tag) => (
@@ -109,7 +109,7 @@ export default function Community() {
             {/* PAGE TITLE */}
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                🌍 Community Feed
+                 Community Feed
               </h2>
               <p className="text-gray-600">
                 Collective action, documented. 🌱

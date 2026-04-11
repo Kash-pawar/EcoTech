@@ -49,8 +49,8 @@ export default function Navbar() {
     // Clear token from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    // Navigate to login page
-    navigate("/login");
+    // Navigate to home page
+    navigate("/");
   };
 
   const navLinks = [

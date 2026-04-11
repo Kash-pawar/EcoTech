@@ -279,11 +279,11 @@ const DailyTracker = () => {
                       onChange={handleGoodWorkChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      <option value="Tree Plantation">🌳 Tree Plantation</option>
-                      <option value="Energy Saving">⚡ Energy Saving</option>
-                      <option value="No Food Waste">🍽️ No Food Waste</option>
+                      <option value="Tree Plantation"> Tree Plantation</option>
+                      <option value="Energy Saving"> Energy Saving</option>
+                      <option value="No Food Waste">No Food Waste</option>
                       <option value="Low Carbon Activity">
-                        🚴 Low Carbon Activity
+                         Low Carbon Activity
                       </option>
                     </select>
                   </div>
@@ -320,7 +320,7 @@ const DailyTracker = () => {
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
                 <div className="mb-6">
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    📊 Today's Tracker
+                     Today's Tracker
                   </h2>
                   <p className="text-gray-600">
                     Track your activities and get AI-powered suggestions
@@ -335,9 +335,9 @@ const DailyTracker = () => {
                     </label>
                     <div className="grid grid-cols-3 gap-3">
                       {[
-                        { value: "Food Wastage", icon: "🍽️" },
-                        { value: "Carbon Footprint", icon: "🚗" },
-                        { value: "Electricity Usage", icon: "⚡" },
+                        { value: "Food Wastage", icon: "" },
+                        { value: "Carbon Footprint", icon: "" },
+                        { value: "Electricity Usage", icon: "" },
                       ].map((cat) => (
                         <button
                           key={cat.value}
@@ -392,10 +392,10 @@ const DailyTracker = () => {
                           onChange={handleTrackerChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         >
-                          <option value="car">🚗 Car</option>
-                          <option value="bike">🚴 Bike</option>
+                          <option value="car"> Car</option>
+                          <option value="bike"> Bike</option>
                           <option value="public_transport">
-                            🚌 Public Transport
+                            Public Transport
                           </option>
                         </select>
                       </div>
@@ -459,7 +459,7 @@ const DailyTracker = () => {
                     {result.type === "success" ? (
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-3xl">✨</span>
+                          <span className="text-3xl"></span>
                           <div>
                             <h4 className="font-semibold text-green-900">
                               Analysis Complete!
@@ -496,7 +496,7 @@ const DailyTracker = () => {
 
                         <div>
                           <h5 className="font-semibold text-green-900 mb-3">
-                            💡 AI Suggestions:
+                             AI Suggestions:
                           </h5>
                           <ul className="space-y-2">
                             {result.data.suggestions.map((suggestion, idx) => (

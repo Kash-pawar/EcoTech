@@ -35,8 +35,8 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(user));
       
       console.log("📝 Token in localStorage:", localStorage.getItem("token"));
-      console.log("🚀 Navigating to /daily");
-      navigate("/daily");
+      console.log("🚀 Navigating to home");
+      navigate("/");
     } catch (error) {
         // : any
       console.error("❌ Login error:", error?.response?.data || error.message);

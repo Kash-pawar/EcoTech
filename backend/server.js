@@ -94,6 +94,9 @@ app.use("/api/auth", require("./routes/authRoutes"));
 // Community
 app.use("/api/posts", require("./routes/postRoutes"));
 
+// Contact
+app.use("/api/contact", require("./routes/contactRoutes"));
+
 // NEW: Daily Tracker
 app.use("/api/daily", require("./routes/daily"));
 
