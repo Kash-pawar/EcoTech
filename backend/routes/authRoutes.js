@@ -5,19 +5,40 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 router.post("/signup", async (req, res) => {
-  const { name, email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
 
-  const user = new User({
-    name,
-    email,
-    password: hashedPassword,
-  });
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  await user.save();
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+    });
 
-  res.json({ message: "User created" });
+    await user.save();
+
+    // Generate token for auto-login
+    const token = jwt.sign({ id: user._id }, "secret");
+
+    res.status(201).json({
+      message: "User created successfully",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 router.post("/login", async (req, res) => {

@@ -1,110 +1,167 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import PostCard from "../components/PostCard";
+import { Leaf, X } from "lucide-react";
 
 export default function Community() {
-
-  // STATE FOR POSTS
-  // Later posts will come from backend (MongoDB)
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
-  // FETCH POSTS FROM BACKEND
+  const tags = [
+    "save water",
+    "public transport",
+    "save electricity",
+    "tree planting",
+    "composting",
+    "bookmarks",
+  ];
+
+  // Get user from localStorage
+  const user = (() => {
+    try {
+      const userJson = localStorage.getItem("user");
+      return userJson ? JSON.parse(userJson) : null;
+    } catch {
+      return null;
+    }
+  })();
+
   useEffect(() => {
-
-    // FUTURE BACKEND CONNECTION
-    // API Example: GET /api/posts
-
-    /*
-    fetch("http://localhost:5000/api/posts")
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((err) => console.log(err));
-    */
-    fetch("http://localhost:5001/api/posts")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch posts");
-        }
-
-        return res.json();
-      })
-      .then(data => {
-        setPosts(data);
-      })
-      .catch(err => console.log(err));
-
+    fetchPosts();
   }, []);
 
+  // Filter posts when selected tag changes
+  useEffect(() => {
+    if (selectedTag) {
+      const filtered = posts.filter((post) =>
+        post.tag?.toLowerCase().includes(selectedTag.toLowerCase())
+      );
+      setFilteredPosts(filtered);
+    } else {
+      setFilteredPosts(posts);
+    }
+  }, [selectedTag, posts]);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/posts");
+      setPosts(response.data);
+      setFilteredPosts(response.data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTagClick = (tag) => {
+    setSelectedTag(selectedTag === tag ? null : tag);
+  };
+
   return (
-
-    <div className="bg-gray-100 min-h-screen">
-
+    <div className="bg-white min-h-screen">
       {/* NAVBAR */}
       <Navbar />
 
-      <div className="flex">
+      <div className="flex pt-20">
+        {/* LEFT SIDEBAR - TAGS SECTION */}
+        <div className="w-64 bg-gray-50 border-r border-gray-200 p-6 min-h-[calc(100vh-80px)]">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">🏷️ Filter by Tag</h3>
 
-        {/* LEFT SIDEBAR */}
-        {/* Contains tags + new post button */}
-        <Sidebar />
-
-        {/* MAIN FEED AREA */}
-        <div className="flex-1 flex justify-center">
-
-          {/* CENTERED CONTENT CONTAINER */}
-          <div className="w-full max-w-3xl p-10">
-
-            {/* PAGE TITLE */}
-            <h2 className="text-2xl font-semibold mb-2">
-              Community Feed
-            </h2>
-
-            <p className="text-gray-500 mb-8">
-              collective action, documented.
-            </p>
-
-            {/* POSTS SECTION */}
-            {/* Later this will render all posts from MongoDB */}
-
-            {posts.map((post) => (
-              <PostCard key={post._id || post.id} post={post} />
+          <div className="space-y-2">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleTagClick(tag)}
+                className={`w-full text-left px-4 py-3 rounded-lg border-2 transition font-medium capitalize ${
+                  selectedTag === tag
+                    ? "bg-green-50 border-green-600 text-green-900"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-green-300 hover:bg-green-50"
+                }`}
+              >
+                {tag}
+              </button>
             ))}
-
-
-            {/* FUTURE FEATURES */}
-
-            {/* 
-            Future Backend Flow:
-
-            User creates post
-                ↓
-            Image uploaded to Cloudinary
-                ↓
-            Cloudinary returns image URL
-                ↓
-            Save data in MongoDB
-
-            {
-              userId,
-              username,
-              imageURL,
-              caption,
-              tag,
-              likes,
-              createdAt
-            }
-
-            Then frontend fetches posts using:
-            GET /api/posts
-            */}
-
           </div>
 
+          {selectedTag && (
+            <button
+              onClick={() => setSelectedTag(null)}
+              className="w-full mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium flex items-center justify-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Clear Filter
+            </button>
+          )}
         </div>
 
-      </div>
+        {/* MAIN CONTENT AREA */}
+        <div className="flex-1 flex justify-center">
+          {/* CENTERED CONTENT CONTAINER */}
+          <div className="w-full max-w-3xl p-10">
+            {/* PAGE TITLE */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                🌍 Community Feed
+              </h2>
+              <p className="text-gray-600">
+                Collective action, documented. 🌱
+                {selectedTag && (
+                  <span className="ml-2 font-semibold text-green-600">
+                    Showing posts tagged with "{selectedTag}"
+                  </span>
+                )}
+              </p>
+            </div>
 
+            {/* LOADING STATE */}
+            {loading && (
+              <div className="text-center py-12">
+                <div className="inline-block mb-3">
+                  <Leaf className="w-8 h-8 text-green-600 animate-spin" />
+                </div>
+                <p className="text-gray-600">Loading posts...</p>
+              </div>
+            )}
+
+            {/* EMPTY STATE */}
+            {!loading && filteredPosts.length === 0 && (
+              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                <Leaf className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium mb-2">
+                  {selectedTag ? "No posts found for this tag" : "No posts yet"}
+                </p>
+                <p className="text-gray-500 text-sm">
+                  {selectedTag
+                    ? "Try selecting a different tag"
+                    : "Be the first to share your eco action!"}
+                </p>
+              </div>
+            )}
+
+            {/* POSTS SECTION */}
+            {!loading && filteredPosts.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-6">
+                  Showing {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""}
+                </p>
+                <div className="space-y-6">
+                  {filteredPosts.map((post) => (
+                    <PostCard key={post._id || post.id} post={post} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

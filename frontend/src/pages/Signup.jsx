@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../api/axios";
 import { motion } from "framer-motion";
+import { Leaf } from "lucide-react";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -19,14 +20,19 @@ export default function Signup() {
     }
 
     try {
-      const response = await axios.post("/api/signup", {
+      const response = await axios.post("/api/auth/signup", {
         name,
         email,
         password,
       });
 
-      alert("Signup successful. Please login to continue.");
-      navigate("/login");
+      // Auto-login after signup
+      const { token, user } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      alert("Signup successful! Redirecting to daily tracker...");
+      navigate("/daily");
     } catch (error) {
       console.error("Signup error:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Signup failed");
@@ -34,40 +40,41 @@ export default function Signup() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#5b8b5a] flex items-center justify-center m-0 p-0">
+    <div className="h-screen w-screen bg-white flex items-center justify-center m-0 p-0">
 
       <div className="w-full h-full flex flex-col md:flex-row overflow-hidden">
 
         {/* LEFT PANEL */}
-        <div className="md:w-[58%] bg-[#5b8b5a] text-white flex flex-col items-center justify-center relative p-10 md:p-12">
+        <div className="md:w-[58%] bg-gradient-to-br from-green-50 to-white text-gray-900 flex flex-col items-center justify-center relative p-10 md:p-12">
 
-          <div className="flex justify-start">
-            <motion.img
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              src="/assets/3315779.jpg"
-              alt="EcoTech"
-              className="w-[68%] max-w-md mb-8 object-contain drop-shadow-lg"
-            />
+          <div className="flex flex-col items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="flex items-center gap-3 mb-12"
+            >
+              <Leaf size={48} className="text-green-600" />
+              <span className="text-4xl font-bold text-green-600">EcoTech</span>
+            </motion.div>
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-left space-y-4 max-w-md"
+            className="space-y-4 md:space-y-5 max-w-md text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
-              EcoTech
+            <h1 className="text-5xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+              Join Us
             </h1>
 
-            <h2 className="text-2xl font-semibold">
-              Redefining Sustainability
+            <h2 className="text-xl font-semibold text-green-600">
+              Build Your Green Future
             </h2>
 
-            <p className="text-md opacity-90 leading-relaxed">
-              EcoTech combines AI and environmental data to help people understand their carbon footprint, reduce waste, and build sustainable daily habits.
+            <p className="text-base text-gray-600 leading-relaxed">
+              Start your sustainability journey today. Track your impact and connect with a community dedicated to positive change.
             </p>
           </motion.div>
         </div>
@@ -78,18 +85,18 @@ export default function Signup() {
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="md:w-[52%] flex items-center justify-center p-8 bg-[#dff0d3] rounded-l-[120px] shadow-xl relative z-10"
+          className="md:w-[52%] flex items-center justify-center p-8 bg-white shadow-xl relative z-10"
         >
 
           <div className="w-full max-w-md space-y-6">
 
             {/* Heading */}
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                Create your account
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Create account
               </h2>
               <p className="text-gray-600 text-sm">
-                Get started with EcoTech
+                Join thousands tracking sustainability
               </p>
             </div>
 
@@ -106,7 +113,7 @@ export default function Signup() {
                   placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none bg-gray-50 hover:bg-white transition"
                 />
               </div>
 
@@ -122,7 +129,7 @@ export default function Signup() {
                   placeholder="email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none bg-gray-50 hover:bg-white transition"
                 />
               </div>
 
@@ -133,19 +140,19 @@ export default function Signup() {
                 </label>
                 <input
                   type="password"
-                  placeholder="********"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none bg-gray-50 hover:bg-white transition"
                 />
               </div>
 
               {/* Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-green-700 to-emerald-800 text-white py-3 rounded-md font-semibold text-lg hover:from-green-800 hover:to-emerald-900 transition duration-300 transform hover:scale-105 shadow-lg"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-lg font-semibold text-lg transition duration-300 transform hover:scale-105 shadow-md"
               >
-                Sign Up
+                Create Account
               </button>
             </form>
 
@@ -154,7 +161,7 @@ export default function Signup() {
               Already have an account?{" "}
               <button
                 onClick={() => navigate("/login")}
-                className="text-green-600 hover:text-green-800 font-semibold"
+                className="text-green-600 hover:text-green-700 font-semibold transition"
               >
                 Log In
               </button>

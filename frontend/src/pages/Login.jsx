@@ -1,10 +1,11 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../api/axios";
 // import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Leaf } from "lucide-react";
 
 
 export default function Login() {
@@ -20,20 +21,25 @@ export default function Login() {
     }
 
     try {
-      const response = await axios.post("/api/login", {
+      console.log("🔄 Attempting login with:", { identifier });
+      const response = await axios.post("/api/auth/login", {
         identifier,
         password,
       });
 
+      console.log("✅ Login successful! Response:", response.data);
       const { token, user } = response.data;
+      
+      console.log("💾 Saving token to localStorage:", token);
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-
-      login(token, user);
-      navigate("/");
+      
+      console.log("📝 Token in localStorage:", localStorage.getItem("token"));
+      console.log("🚀 Navigating to /daily");
+      navigate("/daily");
     } catch (error) {
         // : any
-      console.error("Login error:", error?.response?.data || error.message);
+      console.error("❌ Login error:", error?.response?.data || error.message);
       alert(error?.response?.data?.error || "Login failed");
     }
   };
@@ -41,27 +47,26 @@ export default function Login() {
 
 
   return (
-  
-      <div className="h-screen w-screen bg-[#5b8b5a] flex items-center justify-center m-0 p-0">
+      <div className="h-screen w-screen bg-white flex items-center justify-center m-0 p-0">
 
     <div className="w-full h-full flex flex-col md:flex-row overflow-hidden">
       
      
 
-<div className="md:w-[58%] bg-[#5b8b5a] text-white flex flex-col items-center justify-center relative p-10 md:p-12">
+<div className="md:w-[58%] bg-gradient-to-br from-green-50 to-white text-gray-900 flex flex-col items-center justify-center relative p-10 md:p-12">
           
-          {/* Image */}
-         <div className="flex justify-start">
-  <motion.img
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
+          {/* Logo & Branding */}
+         <div className="flex flex-col items-center justify-center">
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.8, ease: "easeOut" }}
-    src="/assets/3315779.jpg"
-    alt="AI-Powered Sustainable Future"
-    className="w-[68%] max-w-md mb-8 object-contain drop-shadow-lg"
-  />
+    className="flex items-center gap-3 mb-12"
+  >
+    <Leaf size={48} className="text-green-600" />
+    <span className="text-4xl font-bold text-green-600">EcoTech</span>
+  </motion.div>
 </div>
-
 
 
           {/* Text Content */}
@@ -69,17 +74,17 @@ export default function Login() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="z-10 text-center space-y-3 md:space-y-4"
+            className="z-10 space-y-4 md:space-y-5 max-w-md text-center"
           >
-            <div className="z-10 text-left space-y-3 md:space-y-4 max-w-md">
-  <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white">
-    EcoTech
+            <div className="z-10 space-y-4 md:space-y-5 max-w-md text-center">
+  <h1 className="text-5xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+    Welcome Back
   </h1>
-  <h2 className="text-2xl font-semibold text-white">
-    Redefining Sustainability
+  <h2 className="text-xl font-semibold text-green-600">
+    Track Your Impact
   </h2>
-  <p className="text-md text-white opacity-90 leading-relaxed">
-   EcoTech combines AI and environmental data to help people understand their carbon footprint, reduce waste, and build sustainable daily habits.
+  <p className="text-base text-gray-600 leading-relaxed">
+    Continue your sustainability journey. Log in to track your daily activities and progress towards a greener future.
   </p>
 </div>
 
@@ -93,18 +98,18 @@ export default function Login() {
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-         className="md:w-[52%] flex items-center justify-center p-8 bg-[#dff0d3] rounded-l-[120px] shadow-xl relative z-10">
+         className="md:w-[52%] flex items-center justify-center p-8 bg-white shadow-xl relative z-10">
 
           <div className="w-full max-w-md space-y-6">
 
             {/* Heading */}
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Sign in to your account</h2>
-              <p className="text-gray-600 text-sm">Welcome back! Please enter your credentials.</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign in</h2>
+              <p className="text-gray-600 text-sm">Enter your credentials to continue</p>
             </div>
 
             {/* FORM */}
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
               {/* Username */}
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
@@ -115,7 +120,9 @@ export default function Login() {
                   id="username"
                   name="username"
                   placeholder="username@example.com"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 bg-gray-50 hover:bg-white"
                 />
               </div>
 
@@ -129,8 +136,10 @@ export default function Login() {
       type={showPassword ? "text" : "password"}
       id="password"
       name="password"
-      placeholder="********"
-      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+      placeholder="••••••••"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 bg-gray-50 hover:bg-white"
     />
     <div
       className="absolute right-3 top-2.5 text-gray-500 cursor-pointer"
