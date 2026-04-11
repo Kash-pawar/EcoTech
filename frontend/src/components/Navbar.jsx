@@ -55,6 +55,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Home", href: "/home" },
+    { label: "About", href: "#about" },
     { label: "Daily Tracker", href: "/daily" },
     { label: "Weekly Tracker", href: "/weekly" },
     { label: "Community", href: "/community" },
@@ -145,14 +146,39 @@ export default function Navbar() {
                 {link.label}
               </button>
             ))}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              onClick={handleLogout}
-              className="flex items-center gap-2 w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition font-medium"
-            >
-              <LogOut size={16} />
-              Logout
-            </motion.button>
+            <div className="border-t pt-4 mt-4 space-y-2">
+              {isLoggedIn ? (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition font-medium"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </motion.button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      navigate("/login");
+                      setIsOpen(false);
+                    }}
+                    className="w-full text-gray-600 hover:text-green-600 font-medium transition text-sm py-2"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate("/signup");
+                      setIsOpen(false);
+                    }}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition"
+                  >
+                    Signup
+                  </button>
+                </>
+              )}
+            </div>
           </motion.div>
         )}
       </div>

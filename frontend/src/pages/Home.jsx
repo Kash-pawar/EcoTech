@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Leaf, BarChart3, Users, Zap, ChevronDown, LogOut } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Leaf, BarChart3, Users, Zap, ChevronDown } from "lucide-react";
+import Navbar from "../components/Navbar";
 
 export default function HomePage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const [openFAQ, setOpenFAQ] = useState(null);
 
@@ -20,69 +20,10 @@ export default function HomePage() {
     }
   }, [location.hash]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
-
   return (
     <div className="min-h-screen bg-white">
       {/* ========== NAVBAR ========== */}
-      <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 text-2xl font-bold text-green-600">
-            <Leaf size={28} />
-            EcoTrack
-          </div>
-
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#home" className="text-gray-700 hover:text-green-600 transition">
-              Home
-            </a>
-            <button
-              onClick={() => navigate("/daily")}
-              className="text-gray-700 hover:text-green-600 transition"
-            >
-              Daily Tracker
-            </button>
-            <button
-              onClick={() => navigate("/weekly")}
-              className="text-gray-700 hover:text-green-600 transition"
-            >
-              Weekly Tracker
-            </button>
-            <button
-              onClick={() => navigate("/community")}
-              className="text-gray-700 hover:text-green-600 transition"
-            >
-              Community
-            </button>
-            <a href="#faq" className="text-gray-700 hover:text-green-600 transition">
-              FAQ
-            </a>
-            <a href="#contact" className="text-gray-700 hover:text-green-600 transition">
-              Contact
-            </a>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
-
-          <div className="md:hidden">
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 text-white px-3 py-2 rounded text-sm"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ========== HERO SECTION ========== */}
       <section id="home" className="pt-32 pb-20 px-6 bg-gradient-to-br from-green-50 via-white to-green-50">
@@ -134,8 +75,29 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ========== ABOUT US SECTION ========== */}
+      <section id="about" className="py-16 px-6 bg-gradient-to-br from-green-50 via-white to-emerald-50">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12 group">
+            <div className="inline-block">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 group-hover:text-green-600 transition duration-300">About EcoTrack</h2>
+            </div>
+            <div className="w-16 h-1 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto mb-6 group-hover:w-24 transition-all duration-300"></div>
+            <p className="text-sm text-green-600 font-semibold tracking-wide">Our Story & Mission</p>
+          </div>
+          <div className="space-y-5 text-base md:text-lg text-gray-700 leading-relaxed">
+            <p className="hover:text-green-700 hover:translate-x-1 transition duration-300 bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-green-500">
+              <span className="font-semibold text-green-600">We started EcoTrack</span> because we believed that small actions, when multiplied by millions of people, create massive environmental change. Today, our community is tracking millions of eco-friendly actions and reducing carbon footprints across the globe.
+            </p>
+            <p className="hover:text-green-700 hover:translate-x-1 transition duration-300 bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-emerald-500">
+              <span className="font-semibold text-emerald-600">Our mission is simple:</span> empower every individual with data-driven insights to make sustainable choices. We're building a world where eco-consciousness is the norm, not the exception.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ========== FEATURES SECTION ========== */}
-      <section className="py-20 px-6 bg-white">
+      <section id="features" className="py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
             Why Choose EcoTrack?
@@ -400,14 +362,14 @@ export default function HomePage() {
                   </a>
                 </li>
                 <li>
-                  <button onClick={() => navigate("/home")} className="hover:text-green-400 transition hover:scale-105">
+                  <a href="#about" className="hover:text-green-400 transition hover:scale-105 inline-block">
                     About Us
-                  </button>
+                  </a>
                 </li>
                 <li>
-                  <button onClick={() => navigate("/home")} className="hover:text-green-400 transition hover:scale-105">
+                  <a href="#features" className="hover:text-green-400 transition hover:scale-105 inline-block">
                     Features
-                  </button>
+                  </a>
                 </li>
               </ul>
             </div>
