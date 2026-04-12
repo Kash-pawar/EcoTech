@@ -1,8 +1,14 @@
 import axios from "axios";
 
-const instance = axios.create({
-  baseURL: "http://localhost:5001",
-});
+// const instance = axios.create({
+//   baseURL: "http://localhost:5001","https://ecotech-nyvt.onrender.com"
+// });
+const baseURL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5001"
+    : "https://eco-tech-backend.onrender.com";
+
+const instance = axios.create({ baseURL });
 
 // Add auth token to all requests
 instance.interceptors.request.use((config) => {
